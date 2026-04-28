@@ -259,35 +259,62 @@
         = FUNCTION FORM SORTING GALLERY
     -------------------------------------------*/
     function sortingGallery() {
-        if ($(".sortable-gallery .gallery-filters").length) {
-            var $container = $('.gallery-container');
-            $container.isotope({
-                filter:'*',
-                animationOptions: {
-                    duration: 750,
-                    easing: 'linear',
-                    queue: false,
-                }
-            });
+        if (!$(".sortable-gallery .gallery-filters").length) {
+            return;
+        }
+        var $container = $('.gallery-container');
 
-            $(".gallery-filters li a").on("click", function() {
-                $('.gallery-filters li .current').removeClass('current');
-                $(this).addClass('current');
-                var selector = $(this).attr('data-filter');
+        $(".gallery-filters li a").off("click.plumcoGallery").on("click.plumcoGallery", function() {
+            $('.gallery-filters li .current').removeClass('current');
+            $(this).addClass('current');
+            var selector = $(this).attr('data-filter');
+            if ($container.data('isotope')) {
                 $container.isotope({
-                    filter:selector,
+                    filter: selector,
                     animationOptions: {
                         duration: 750,
                         easing: 'linear',
                         queue: false,
                     }
                 });
-                return false;
+            }
+            return false;
+        });
+
+        function initIsotope() {
+            if ($container.data('isotope')) {
+                return;
+            }
+            $container.isotope({
+                itemSelector: '.grid',
+                layoutMode: 'fitRows',
+                filter: '*',
+                animationOptions: {
+                    duration: 750,
+                    easing: 'linear',
+                    queue: false,
+                }
             });
         }
-    }
 
-    sortingGallery();
+        if (typeof $.fn.imagesLoaded === 'function') {
+            $container.imagesLoaded(function() {
+                initIsotope();
+                $container.isotope('layout');
+                requestAnimationFrame(function() {
+                    $container.isotope('layout');
+                });
+            });
+        } else {
+            initIsotope();
+        }
+
+        $(window).on('resize.plumcoGallery', function() {
+            if ($container.data('isotope')) {
+                $container.isotope('layout');
+            }
+        });
+    }
 
 
     /*------------------------------------------
